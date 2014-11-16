@@ -1242,7 +1242,9 @@ static int EVOPerhiperalAssociatedObjectKey = 42;
 {
 	[self
 		sendScanInfoForPeriperhal: peripheral
-		RSSI: RSSI];
+		RSSI: RSSI
+        advertisementData: advertisementData
+];
 }
 
 /**
@@ -1432,7 +1434,16 @@ static int EVOPerhiperalAssociatedObjectKey = 42;
  */
 - (void) sendScanInfoForPeriperhal: (CBPeripheral *)peripheral
 	RSSI: (NSNumber *)RSSI
+    advertisementData: (NSDictionary *)advertisementData
 {
+    // convert advertisementData for Cordova
+    NSData* manufData = [advertisementData valueForKey:CBAdvertisementDataManufacturerDataKey];
+    NSString* manufDataString;
+    if (manufData) {
+        manufDataString = [manufData base64EncodedStringWithOptions:0];
+    } else {
+        manufDataString = @"";
+    }
 	// Create an info object.
 	// The UUID is used as the address of the device (the 6-byte BLE address
 	// does not seem to be directly available on iOS).
@@ -1440,7 +1451,8 @@ static int EVOPerhiperalAssociatedObjectKey = 42;
 		@"address" : [peripheral.identifier UUIDString],
 		@"rssi" : RSSI,
 		@"name" : (peripheral.name != nil) ? peripheral.name : [NSNull null],
-		@"scanRecord" : @""
+		@"scanRecord" : @"",
+        @"manufacturerData" : manufDataString
 	};
 
 	// Send back data to JS.
